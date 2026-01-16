@@ -1,0 +1,21 @@
+# The main pipeline for attempt_one
+resources:
+  pipelines:
+    attempt_one_pipeline:
+      name: attempt_one_pipeline
+      ## Catalog is required for serverless compute
+      catalog: agustin_training_catalog
+      schema: attempt_one_${bundle.target}
+      serverless: true
+      libraries:
+        - notebook:
+            path: ../src/dlt_pipeline.ipynb
+
+      configuration:
+        bundle.sourcePath: ${workspace.file_path}/src
+
+  schemas:
+    my_schema:
+      name: test-schema
+      catalog_name: agustin_training_catalog
+      comment: This schema was created by Databricks Asset Bundles.

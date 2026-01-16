@@ -1,0 +1,57 @@
+resources:
+  jobs:
+    segment_ingestion_and_export:
+      name: segment_ingestion_and_export
+      queue:
+        enabled: true
+      trigger:
+        pause_status: UNPAUSED
+        file_arrival:
+          url: /Volumes/${var.catalog}/${resources.schemas.sfmc.name}/${resources.volumes.files.name}/
+          min_time_between_triggers_seconds: 120
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: AddContacts
+          notebook_task:
+            notebook_path: ../src/AddContacts.py
+        - task_key: RemoveContacts
+          notebook_task:
+            notebook_path: ../src/RemoveContacts.py
+        - task_key: ContactsSilver
+          depends_on:
+            - task_key: AddContacts
+            - task_key: RemoveContacts
+          notebook_task:
+            notebook_path: ../src/ContactsSilver.py
+        - task_key: ContactsSegments
+          depends_on:
+            - task_key: AddContacts
+            - task_key: RemoveContacts
+          notebook_task:
+            notebook_path: ../src/ContactsSegments.py
+        - task_key: MainTable
+          depends_on:
+            - task_key: ContactsSegments
+            - task_key: ContactsSilver
+          notebook_task:
+            notebook_path: ../src/MainTable.py
+        - task_key: ExportFiles
+          depends_on:
+            - task_key: MainTable
+          notebook_task:
+            notebook_path: ../src/ExportFiles.py
+
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${resources.schemas.sfmc.name}
+        - name: volume
+          default: ${resources.volumes.files.name}
+        - name: export_volume
+          default: ${resources.volumes.export_volume.name}
+
+
+
+
+

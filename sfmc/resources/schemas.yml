@@ -1,0 +1,36 @@
+resources:
+  schemas:
+    sfmc:
+      name: sfmc
+      catalog_name: ${var.catalog}
+      comment: This schema is used for the sfmc project
+
+  volumes:
+    files:
+      name: files
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.sfmc.name}
+      volume_type: MANAGED
+      comment: This volume was created by Databricks Asset Bundles for the project sfmc
+
+    checkpoints:
+      name: checkpoints
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.sfmc.name}
+      volume_type: MANAGED
+      comment: This volume was created by Databricks Asset Bundles for the project sfmc
+
+    export_volume:
+      name: export_volume
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.sfmc.name}
+      volume_type: MANAGED
+      comment: This volume was created by Databricks Asset Bundles for the project sfmc
+
+    mock_files:
+      name: mock_files
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.sfmc.name}
+      volume_type: MANAGED
+      comment: This volume is created to store mock data
+    
