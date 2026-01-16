@@ -1,6 +1,8 @@
 from pyspark import pipelines as dp
-from pyspark.sql.functions import col
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from databricks.sdk.runtime import spark
 
 # This file defines a sample transformation.
 # Edit the sample below or add new transformations
