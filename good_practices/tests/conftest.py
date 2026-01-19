@@ -33,6 +33,17 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
 
 
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    mode = config.getoption("--compute")
+    skip_databricks = pytest.mark.skip(reason="requires --compute=databricks")
+    skip_local = pytest.mark.skip(reason="requires --compute=local")
+    for item in items:
+        if "databricks_only" in item.keywords and mode != "databricks":
+            item.add_marker(skip_databricks)
+        if "local_only" in item.keywords and mode != "local":
+            item.add_marker(skip_local)
+
+
 @pytest.fixture()
 def spark(request: pytest.FixtureRequest) -> SparkSession:
     """Provide a SparkSession fixture for tests.
@@ -102,6 +113,8 @@ def _allow_stderr_output(config: pytest.Config):
 
 def pytest_configure(config: pytest.Config):
     """Configure pytest session."""
+    config.addinivalue_line("markers", "databricks_only: skip if not on Databricks")
+    config.addinivalue_line("markers", "local_only: skip if not local")
     with _allow_stderr_output(config):
         compute = config.getoption("--compute")
         if compute == "local":
