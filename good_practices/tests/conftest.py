@@ -4,28 +4,37 @@ This file is in the root since it can be used for tests in any place in this
 project, including tests under resources/.
 """
 
+from __future__ import annotations
+
+import csv
+import json
 import os
-import sys
 import pathlib
+import sys
+import types
 from contextlib import contextmanager
+from typing import Optional, TYPE_CHECKING
 
+import pytest
 
-try:
-    from databricks.connect import DatabricksSession
-    from databricks.sdk import WorkspaceClient
+if TYPE_CHECKING:
     from pyspark.sql import SparkSession
-    import pytest
-    import json
-    import csv
-    import os
-except ImportError:
-    raise ImportError(
-        "Test dependencies not found.\n\nRun tests using 'uv run pytest'. See http://docs.astral.sh/uv to learn more about uv."
+
+_LOCAL_SPARK: Optional["SparkSession"] = None
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--compute",
+        action="store",
+        default=os.environ.get("TEST_COMPUTE", "databricks"),
+        choices=["databricks", "local"],
+        help="Select compute backend: databricks or local (env: TEST_COMPUTE).",
     )
 
 
 @pytest.fixture()
-def spark() -> SparkSession:
+def spark(request: pytest.FixtureRequest) -> SparkSession:
     """Provide a SparkSession fixture for tests.
 
     Minimal example:
@@ -33,7 +42,10 @@ def spark() -> SparkSession:
             df = spark.createDataFrame([(1,)], ["x"])
             assert df.count() == 1
     """
-    return DatabricksSession.builder.getOrCreate()
+    compute = request.config.getoption("--compute")
+    if compute == "local":
+        return _get_local_spark()
+    return _get_databricks_spark()
 
 
 @pytest.fixture()
@@ -64,6 +76,8 @@ def load_fixture(spark: SparkSession):
 
 def _enable_fallback_compute():
     """Enable serverless compute if no compute is specified."""
+    from databricks.sdk import WorkspaceClient
+
     conf = WorkspaceClient().config
     if conf.serverless_compute_id or conf.cluster_id or os.environ.get("SPARK_REMOTE"):
         return
@@ -89,12 +103,63 @@ def _allow_stderr_output(config: pytest.Config):
 def pytest_configure(config: pytest.Config):
     """Configure pytest session."""
     with _allow_stderr_output(config):
+        compute = config.getoption("--compute")
+        if compute == "local":
+            _bootstrap_local_runtime()
+            return
+
         _enable_fallback_compute()
 
         # Initialize Spark session eagerly, so it is available even when
         # SparkSession.builder.getOrCreate() is used. For DB Connect 15+,
         # we validate version compatibility with the remote cluster.
-        if hasattr(DatabricksSession.builder, "validateSession"):
-            DatabricksSession.builder.validateSession().getOrCreate()
+        if hasattr(_get_databricks_builder(), "validateSession"):
+            _get_databricks_builder().validateSession().getOrCreate()
         else:
-            DatabricksSession.builder.getOrCreate()
+            _get_databricks_builder().getOrCreate()
+
+
+def _get_databricks_builder():
+    from databricks.connect import DatabricksSession
+
+    return DatabricksSession.builder
+
+
+def _get_databricks_spark() -> SparkSession:
+    return _get_databricks_builder().getOrCreate()
+
+
+def _get_local_spark() -> SparkSession:
+    try:
+        from pyspark.sql import SparkSession as SparkSessionRuntime
+    except ImportError as exc:
+        raise ImportError(
+            "PySpark is required for local tests. Install it and rerun with --compute=local."
+        ) from exc
+
+    global _LOCAL_SPARK
+    if _LOCAL_SPARK is None:
+        _LOCAL_SPARK = (
+            SparkSessionRuntime.builder.master("local[*]")
+            .appName("good_practices_tests")
+            .getOrCreate()
+        )
+    return _LOCAL_SPARK
+
+
+def _bootstrap_local_runtime() -> None:
+    spark_session = _get_local_spark()
+    try:
+        import databricks.sdk.runtime as runtime  # type: ignore
+
+        runtime.spark = spark_session
+        return
+    except Exception:
+        pass
+
+    runtime = types.ModuleType("databricks.sdk.runtime")
+    runtime.spark = spark_session
+    sys.modules.setdefault("databricks", types.ModuleType("databricks"))
+    sys.modules.setdefault("databricks.sdk", types.ModuleType("databricks.sdk"))
+    sys.modules["databricks.sdk.runtime"] = runtime
+    sys.modules["databricks.sdk"].runtime = runtime

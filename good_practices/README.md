@@ -23,3 +23,19 @@ To deploy and manage this asset bundle, follow these steps:
 
 - For information on using **Databricks Asset Bundles in the workspace**, see: [Databricks Asset Bundles in the workspace](https://docs.databricks.com/aws/en/dev-tools/bundles/workspace-bundles)
 - For details on the **Databricks Asset Bundles format** used in this asset bundle, see: [Databricks Asset Bundles Configuration reference](https://docs.databricks.com/aws/en/dev-tools/bundles/reference)
+
+## Testing
+
+Run tests against Databricks (default):
+
+```bash
+uv run pytest --compute=databricks
+```
+
+Run tests locally (requires PySpark installed):
+
+```bash
+uv run pytest --compute=local
+```
+
+You can also set `TEST_COMPUTE=databricks|local` to control the default mode.
