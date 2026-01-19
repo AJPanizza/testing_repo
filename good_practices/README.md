@@ -32,10 +32,16 @@ Run tests against Databricks (default):
 uv run pytest --compute=databricks
 ```
 
-Run tests locally (requires PySpark installed):
+Run tests locally (requires PySpark + Delta support installed):
 
 ```bash
 uv run pytest --compute=local
 ```
 
 You can also set `TEST_COMPUTE=databricks|local` to control the default mode.
+
+### Delta tables in local tests
+
+Local-mode tests use a local Spark session configured with Delta Lake extensions so you can create/write/read Delta tables during tests (via `delta-spark`).
+
+For more detail (compute selection, markers, fixture loading, and Delta setup), see `good_practices/testing.md`.

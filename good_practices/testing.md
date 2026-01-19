@@ -77,8 +77,9 @@ How to explicitly select compute:
 
 When running with `--compute=local`:
 
-1. `conftest.py` creates a local Spark session with `local[*]` and caches it for reuse across tests.
+1. `conftest.py` creates a local Spark session (master `local`) and caches it for reuse across tests.
 2. It shims `databricks.sdk.runtime.spark` to point at that local session.
+3. It enables Delta Lake support (so you can write/read Delta tables during tests).
 
 That shim is important because production code in this repo often does:
 
@@ -87,6 +88,24 @@ from databricks.sdk.runtime import spark
 ```
 
 So local tests can exercise the same code paths without requiring an actual Databricks runtime.
+
+#### Delta table manipulation (local)
+
+Local Spark is configured with Delta Lake by enabling:
+
+- `spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension`
+- `spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog`
+
+It also sets a temporary warehouse directory and Derby home so table operations can work without polluting your repo or requiring a preconfigured local metastore.
+
+Example pattern for tests (local mode):
+
+```python
+path = "/tmp/delta_test_table"
+df.write.format("delta").mode("overwrite").save(path)
+read_back = spark.read.format("delta").load(path)
+assert read_back.count() == df.count()
+```
 
 ### Fixture loading (`load_fixture`)
 
@@ -104,8 +123,8 @@ Notes:
 
 Dependencies are declared in `good_practices/pyproject.toml`:
 
-- Runtime: includes `pyspark` and `org-logging`.
-- Dev/test: includes `pytest`, `databricks-connect`, and `zstandard` (required by Spark Connect).
+- Runtime: includes `pyspark`.
+- Dev/test: includes `pytest`, `databricks-connect` (Databricks mode), `zstandard` (required by Spark Connect), and `delta-spark` (local Delta support).
 
 ### Adding new tests
 
