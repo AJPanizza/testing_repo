@@ -1,0 +1,7 @@
+variables:
+  catalog:
+    description: Catalog where the library is stored
+  schema:
+    description: Schema where the library is stored
+  volume:
+    description: Volume where the library is stored

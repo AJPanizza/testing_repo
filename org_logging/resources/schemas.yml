@@ -1,0 +1,34 @@
+resources:
+  schemas:
+    landing_schema:
+      name: non_credentialing_sfmc_marketing_landing
+      catalog_name: ${var.landing_catalog}
+      comment: This schema is used for manually uploading the files used in the project.
+
+    non_credentialing_sfmc_marketing:
+      name: non_credentialing_sfmc_marketing
+      catalog_name: ${var.catalog}
+      comment: This schema is used for the project tables and internal operation files.
+
+  volumes:
+    files:
+      name: files
+      catalog_name: ${var.landing_catalog}
+      schema_name: ${resources.schemas.landing_schema.name}
+      volume_type: MANAGED
+      comment: This volume stores the manually created files used in the project.
+
+    checkpoints:
+      name: checkpoints
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.non_credentialing_sfmc_marketing.name}
+      volume_type: MANAGED
+      comment: This volume stores internal files for checkpoint tracking in the project.
+
+    export_volume:
+      name: export_volume
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.landing_schema.name}
+      volume_type: MANAGED
+      comment: This volume stores the files that are ready for exporting in the project.
+    

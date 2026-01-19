@@ -1,0 +1,39 @@
+# This is a Databricks asset bundle definition for org_logging.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: org_logging
+  uuid: 250d36d8-c886-4aea-93d5-aef3e32c00bc
+
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel && cp dist/*.whl /Volumes/${var.catalog}/${var.schema}/${var.volume}/python/
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+  - variables/*.yml
+
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-56f60291-144c.cloud.databricks.com
+    presets:
+      artifacts_dynamic_version: true
+    variables:
+      catalog: agustin_training_catalog
+      schema: org_logging
+      volume: libraries
+
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-56f60291-144c.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/agustin.panizza@sunnydata.ai to make sure we only have a single copy.
+      root_path: /Workspace/Users/agustin.panizza@sunnydata.ai/.bundle/${bundle.name}/${bundle.target}
+    permissions:
+      - user_name: agustin.panizza@sunnydata.ai
+        level: CAN_MANAGE
