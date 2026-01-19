@@ -145,18 +145,36 @@ def _get_databricks_spark() -> SparkSession:
 def _get_local_spark() -> SparkSession:
     try:
         from pyspark.sql import SparkSession as SparkSessionRuntime
+        from delta import configure_spark_with_delta_pip
+        from tempfile import mkdtemp
     except ImportError as exc:
         raise ImportError(
-            "PySpark is required for local tests. Install it and rerun with --compute=local."
+            "PySpark, delta and tempfile are required for local tests. Install it and rerun with --compute=local."
         ) from exc
 
     global _LOCAL_SPARK
-    if _LOCAL_SPARK is None:
-        _LOCAL_SPARK = (
-            SparkSessionRuntime.builder.master("local[*]")
-            .appName("good_practices_tests")
-            .getOrCreate()
+
+    PROJECT_SRC = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "src"),
+    )
+    sys.path.insert(0, PROJECT_SRC)
+
+    builder = (
+        SparkSessionRuntime.builder.appName("unit-tests")
+        .master("local")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
         )
+        .config("spark.sql.catalogImplementation", "hive")
+        .config("spark.sql.warehouse.dir", mkdtemp())
+        .config("spark.driver.extraJavaOptions", f"-Dderby.system.home={mkdtemp()}")
+        .config("spark.executorEnv.PYTHONPATH", PROJECT_SRC)
+    )
+    if _LOCAL_SPARK is None:
+        _LOCAL_SPARK = configure_spark_with_delta_pip(builder).getOrCreate()
+
     return _LOCAL_SPARK
 
 
