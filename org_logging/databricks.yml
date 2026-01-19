@@ -7,12 +7,13 @@ bundle:
 artifacts:
   python_artifact:
     type: whl
-    build: uv build --wheel && cp dist/*.whl /Volumes/${var.catalog}/${var.schema}/${var.volume}/python/
+    build: uv build --wheel
+  
 
 include:
   - resources/*.yml
   - resources/*/*.yml
-  - variables/*.yml
+  - variables.yml
 
 
 targets:
@@ -25,8 +26,8 @@ targets:
       artifacts_dynamic_version: true
     variables:
       catalog: agustin_training_catalog
-      schema: org_logging
-      volume: libraries
+      schema: libraries
+      volume: default
 
   prod:
     mode: production
