@@ -2,7 +2,7 @@
 name = "good_practices"
 version = "0.0.1"
 authors = [{ name = "agustin.panizza@sunnydata.ai" }]
-requires-python = ">=3.10,<=3.13"
+requires-python = "==3.12"
 dependencies = [
     # Any dependencies for jobs and pipelines in this project can be added here
     # See also https://docs.databricks.com/dev-tools/bundles/library-dependencies
@@ -33,7 +33,7 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [tool.uv.sources]
-org-logging = { path = "org_logging-0.1.0+1768832188192251944-py3-none-any.whl" }
+org-logging = { path = "org_logging-0.1.0+1768841622408122662-py3-none-any.whl" }
 
 [tool.black]
 line-length = 125
