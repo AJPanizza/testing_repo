@@ -5,6 +5,7 @@ bundle:
   uuid: 5bbfcdd6-7618-45d7-86f9-703fa688bb31
 
 include:
+  - dev_resources/*.yml
   - resources/*.yml
   - resources/*/*.yml
 
@@ -31,6 +32,8 @@ targets:
       schema: ${workspace.current_user.short_name}
     presets:
       artifacts_dynamic_version: true
+
+
   prod:
     mode: production
     workspace:
@@ -43,3 +46,6 @@ targets:
     permissions:
       - user_name: agustin.panizza@sunnydata.ai
         level: CAN_MANAGE
+    sync:
+      exclude: 
+        - dev_resources/*.yml
