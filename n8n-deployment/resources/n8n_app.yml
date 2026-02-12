@@ -5,14 +5,16 @@ resources:
       name: 'n8n-databricks-app'
       source_code_path: ../src 
       description: 'A Databricks app which self hosts n8n for building workflows'
-      config:
-        env:
-          - name: DB_POSTGRESDB_HOST
-            value: ${resources.database_instances.n8n_postgres_instance.host}
-          - name: N8N_ENCRYPTION_KEY
-            value: ${var.encryption_key}
+      # config:
+      #   env:
+      #     - name: DB_POSTGRESDB_HOST
+      #       value: ${resources.database_instances.n8n_postgres_instance.host}
+      #     - name: N8N_ENCRYPTION_KEY
+      #       value: ${var.encryption_key}
+      #     - name: ATTEMPT
+      #       value: '1'
       resources:
-        - name: ${resources.database_instances.n8n_postgres_instance.name}
+        - name: postgres-database
           database: 
             database_name: databricks_postgres
             instance_name: ${resources.database_instances.n8n_postgres_instance.name}

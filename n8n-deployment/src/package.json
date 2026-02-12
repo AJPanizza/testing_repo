@@ -11,6 +11,6 @@
     "check-db": "node check-db.js",
     "install-community-nodes": "mkdir -p ~/.n8n/nodes && cd ~/.n8n/nodes && npm i --legacy-peer-deps @mbakgun/n8n-nodes-slack-socket-mode n8n-nodes-databricks",
     "n8n": "n8n",
-    "start": "npm run install-community-nodes && npm run check-db && npm run n8n"
+    "start": "npm run check-db && npm run n8n"
   }
 }
