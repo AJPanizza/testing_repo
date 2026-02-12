@@ -1,0 +1,7 @@
+resources:
+  database_instances:
+    n8n_postgres_instance:
+      name: 'n8n-postgres-instance'
+      capacity: CU_1
+      enable_pg_native_login: true
+      # custom_tags: ${var.default_tags}

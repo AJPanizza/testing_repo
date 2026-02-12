@@ -1,0 +1,14 @@
+variables:
+  default_tags:
+    description: Variable used to enforce tags on everything
+    type: complex
+    default:
+      Client: AMA
+      Business_Unit: HS
+      Team: Datalabs
+      Product: PPD
+      Project: State_License_Procurement
+      Budget_Code: PBQ
+  encryption_key:
+    description: Encryption key for n8n, must be 32 characters long
+    default: 1xM9fw1rTLEJpjf/p6wSu/7qbRM4XK3fyMb7XESzC+Y=

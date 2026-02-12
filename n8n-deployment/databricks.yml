@@ -1,0 +1,14 @@
+bundle:
+  name: n8n_databricks_app_bundle
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+  - variables.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-56f60291-144c.cloud.databricks.com

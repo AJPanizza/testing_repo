@@ -1,0 +1,36 @@
+
+resources:
+  apps:
+    n8n_databricks_app:
+      name: 'n8n-databricks-app'
+      source_code_path: ../src 
+      description: 'A Databricks app which self hosts n8n for building workflows'
+      config:
+        env:
+          - name: DB_POSTGRESDB_HOST
+            value: ${resources.database_instances.n8n_postgres_instance.host}
+          - name: N8N_ENCRYPTION_KEY
+            value: ${var.encryption_key}
+      resources:
+        - name: ${resources.database_instances.n8n_postgres_instance.name}
+          database: 
+            database_name: databricks_postgres
+            instance_name: ${resources.database_instances.n8n_postgres_instance.name}
+            permission: CAN_CONNECT_AND_CREATE
+        - name: 'postgres-password'
+          secret:
+            scope: n8n-demo
+            key: postgres-password
+            permission: READ
+        - name: 'postgres-user'
+          secret:
+            scope: n8n-demo
+            key: postgres-user
+            permission: READ
+
+    #         config = {
+    # "user": "n8n_local_user",
+    # "password": "n8ndemopass",
+    # "host": "instance-c2dd621e-e2b7-4ac3-8fda-3e759e7e8761.database.cloud.databricks.com",
+    # "port": "5432",
+    # "dbname": "databricks_postgres",
