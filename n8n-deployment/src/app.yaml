@@ -5,10 +5,10 @@ env:
     value: "https"
   - name: N8N_PROXY_HOPS
     value: "1"
-  - name: WEBHOOK_URL
-    value: 'None'
+  - name: N8N_WEBHOOK_URL
+    value: https://n8n-databricks-app-4438540030412947.aws.databricksapps.com
   - name: N8N_HOST
-    value: None
+    value: n8n-databricks-app-4438540030412947.aws.databricksapps.com
   - name: N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE
     value: 'true'
   - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
